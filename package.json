@@ -1,0 +1,23 @@
+{
+  "name": "slack-dnd-5e",
+  "version": "0.0.2",
+  "description": "Slackbot for managing and playing with D&D 5e characters",
+  "main": "dndbot.js",
+  "scripts": {
+    "build": "rm dnd-slack-bot.zip; zip -r dnd-slack-bot.zip dndbot.js node_modules src",
+    "test": "mocha 'test/*.test.js'"
+  },
+  "author": "Matthew Kemp",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.302.0",
+    "enumify": "^1.0.4",
+    "node-cache": "^4.2.0",
+    "xregexp": "^4.2.0"
+  },
+  "devDependencies": {
+    "mocha": "^5.2.0",
+    "random": "^2.0.12",
+    "seedrandom": "^2.4.4"
+  }
+}

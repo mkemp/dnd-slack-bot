@@ -1,0 +1,22 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+    - echo Build started on `date`
+    - echo Installing packages...
+    - npm install
+  pre_build:
+    commands:
+    - echo Running tests...
+    - npm test
+  build:
+    commands:
+    - echo Building zip...
+    - npm run-script build
+  post_build:
+    commands:
+    - echo Build completed on `date`
+artifacts:
+  files:
+  - dnd-slack-bot.zip
