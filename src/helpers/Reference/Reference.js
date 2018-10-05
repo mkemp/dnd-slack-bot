@@ -1,7 +1,7 @@
 'use strict';
 
 const {Enum} = require('enumify');
-const Preconditions = require('./preconditions');
+const Preconditions = require('../preconditions');
 
 class Proficiency {
     static levelToModifier(level) {

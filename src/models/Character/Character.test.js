@@ -1,9 +1,9 @@
 'use strict';
 
 const assert = require('assert');
-const {Character} = require('../src/character');
-const {RollDecorator} = require('../src/dice');
-const {Skills} = require('../src/reference');
+const Character = require('./Character');
+const { RollDecorator } = require('../Dice');
+const { Skills } = require('../../helpers/Reference');
 
 const bardObj = {
     "name": "Balven",

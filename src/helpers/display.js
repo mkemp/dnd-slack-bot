@@ -1,6 +1,6 @@
 'use strict';
 
-const {Skills, Stats} = require('./reference');
+const {Skills, Stats} = require('./Reference');
 const Validation = require('./validation');
 
 function formatCharacter(character, verbose) {

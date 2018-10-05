@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const {Proficiency, Skills, Stats} = require('../src/reference');
+const {Proficiency, Skills, Stats} = require('./Reference');
 
 describe('Proficiency.levelToModifier()', function() {
     const tests = [

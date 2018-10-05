@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const {Parser, RollDecorator, Roller} = require('../src/dice');
+const {Parser, RollDecorator, Roller} = require('./Dice');
 const random = require('random');
 const seedrandom = require('seedrandom');
 const convertRollToFloat = (roll, max) => (roll - 1) / max;

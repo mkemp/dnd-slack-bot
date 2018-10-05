@@ -1,6 +1,6 @@
 'use strict';
 
-const Validation = require('./validation');
+const { isDefined } = require('../validation');
 
 module.exports.checkInRange = function checkInRange(val, min, max) {
     if (val < min || max < val) {
@@ -15,7 +15,7 @@ module.exports.checkPositive = function checkPositive(val) {
 };
 
 module.exports.checkNotNull = function checkNotNull(val, msg) {
-    if (!Validation.isDefined(val)) {
+    if (!isDefined(val)) {
         throw new Error(`Value cannot be null or undefined${msg ? ': ' + msg : ''}`);
     }
 };

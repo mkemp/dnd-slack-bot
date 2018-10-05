@@ -1,9 +1,9 @@
 'use strict';
 
 const {Enum} = require('enumify');
-const {formatCharacter, formatRoll} = require('./display');
-const {Parser, Roller, RollDecorator} = require('./dice');
-const {Skills, Stats} = require('./reference');
+const {formatCharacter, formatRoll} = require('../../helpers/display');
+const {Parser, Roller, RollDecorator} = require('../Dice');
+const {Skills, Stats} = require('../../helpers//Reference');
 const XRegExp = require('xregexp');
 
 /**
@@ -259,8 +259,9 @@ class Store {
 
 class Summarize {
     static async execute(storage, userId, workspaceId, workspaceName, text, format=formatCharacter) {
-        const userName = text.replace(/verbose\s*/, '');
-        const character = await storage.load({userId, userName, workspaceId, workspaceName});
+        const userName = text.replace(/verbose\s*/, '').trim();
+        const params = {userId, userName, workspaceId, workspaceName};
+        const character = await storage.load(params);
         return format(character, text.startsWith('verbose'));
     }
 

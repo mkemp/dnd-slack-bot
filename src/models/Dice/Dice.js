@@ -1,7 +1,7 @@
 'use strict';
 
 const {Enum} = require('enumify');
-const Validation = require('./validation');
+const Validation = require('../../helpers/validation');
 
 /**
  * Allows decoration of rolls in their string format.

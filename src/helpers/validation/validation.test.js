@@ -1,9 +1,9 @@
 'use strict';
 
 const assert = require('assert');
-const Validation = require('../src/validation');
+const validation = require('./validation');
 
-describe('Validation.isDefined()', function() {
+describe('validation.isDefined()', function() {
     const tests = [
         {name: 'undefined', arg: undefined, expected: false},
         {name: 'null',      arg: null,      expected: false},
@@ -14,13 +14,13 @@ describe('Validation.isDefined()', function() {
 
     tests.forEach(function(test) {
         it('correctly checks ' + test.name, function() {
-            assert.equal(Validation.isDefined(test.arg), test.expected);
+            assert.equal(validation.isDefined(test.arg), test.expected);
         });
     });
 });
 
 
-describe('Validation.isPresent()', function() {
+describe('validation.isPresent()', function() {
     const tests = [
         {name: 'undefined', arg: undefined, expected: false},
         {name: 'null',      arg: null,      expected: false},
@@ -31,7 +31,7 @@ describe('Validation.isPresent()', function() {
 
     tests.forEach(function(test) {
         it('correctly checks ' + test.name, function() {
-            assert.equal(Validation.isPresent(test.arg), test.expected);
+            assert.equal(validation.isPresent(test.arg), test.expected);
         });
     });
 });

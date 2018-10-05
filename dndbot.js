@@ -1,7 +1,7 @@
 'use strict';
 
 const {handleCommandWithArguments, handleFormEncoded} = require('src/index');
-const Validation = require('src/validation');
+const Validation = require('src/helpers/validation');
 
 async function processEvent(event, callback) {
     const params = handleFormEncoded(event.body);

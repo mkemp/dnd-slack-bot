@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('assert');
-const Preconditions = require('../src/preconditions');
+const Preconditions = require('./preconditions');
 
 describe('Preconditions.checkInRange()', function() {
 

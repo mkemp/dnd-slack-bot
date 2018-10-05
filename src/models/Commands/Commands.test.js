@@ -1,8 +1,8 @@
 'use strict';
 
 const assert = require('assert');
-const {Commands} = require('../src/commands');
-const {RollDecorator} = require('../src/dice');
+const {Commands} = require('./Commands');
+const {RollDecorator} = require('../Dice');
 
 describe('Commands', function () {
     function formatRoll(character, evaluation) {

@@ -1,10 +1,10 @@
 'use strict';
 
 const {DynamoDB, S3} = require('aws-sdk');
-const {Character} = require('./character');
+const Character = require('../Character');
 const NodeCache = require('node-cache');
-const Preconditions = require('./preconditions');
-const Validation = require('./validation');
+const Preconditions = require('../../helpers/preconditions');
+const Validation = require('../../helpers/validation');
 
 function toAttribute(obj) {
     switch ((typeof (obj || '')).toLowerCase()) {
