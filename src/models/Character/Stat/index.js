@@ -1,3 +1,3 @@
-'use strict';
+"use strict";
 
-module.exports = require('./Stat.js');
+module.exports = require("./Stat.js");

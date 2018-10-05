@@ -1,3 +1,3 @@
-'use strict';
+"use strict";
 
-module.exports = require('./Character.js');
+module.exports = require("./Character.js");

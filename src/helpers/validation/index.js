@@ -1,3 +1,3 @@
-'use strict';
+"use strict";
 
-module.exports = require('./validation.js');
+module.exports = require("./validation.js");

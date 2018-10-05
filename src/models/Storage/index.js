@@ -1,3 +1,3 @@
-'use strict';
+"use strict";
 
-module.exports = require('./Storage.js');
+module.exports = require("./Storage.js");

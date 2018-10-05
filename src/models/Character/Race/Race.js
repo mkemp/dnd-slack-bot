@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * Represent a characters race.
@@ -10,7 +10,7 @@ module.exports = class Race {
   }
 
   toString() {
-    return `${this.sub ? this.sub + ' ' : ''}${this.name}`;
+    return `${this.sub ? this.sub + " " : ""}${this.name}`;
   }
 
   static from(obj) {

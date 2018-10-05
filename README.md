@@ -108,37 +108,39 @@ The dice logic is borrows heavily from [dicebot](https://github.com/arkie/dicebo
 commands and uses the same underlying formula to resolve them.
 
 1. An optional operation, either:
-	* `+` for addition
-	* `-` for subtraction
-	* `*` or `x` for multiplication
-	* `/` for division
-	* `^` for maximum
-	* `v` for minimum
 
-	If there is no operation, addition is assumed (e.g. `1d20 1d20` will roll two d20s and add the results).
+   - `+` for addition
+   - `-` for subtraction
+   - `*` or `x` for multiplication
+   - `/` for division
+   - `^` for maximum
+   - `v` for minimum
 
-	There is no "order of operations" or grouping of roll expressions, each expression's operation applies its value to
-	the result of all the preceding expressions. For example, `1d4 * 1d6 ^ 1d8 + 1d10` will roll 1d4, then roll 1d6 and
-	multiply the previous result by that, then roll 1d8 and take either that value or the previous result, whichever is
-	higher, then roll 1d10 and add it to the previous result. If the rolls were `1 5 3 8`, the result would be
-	`(((1 * 5) ^ 3) + 8)`, totalling 13.
+   If there is no operation, addition is assumed (e.g. `1d20 1d20` will roll two d20s and add the results).
+
+   There is no "order of operations" or grouping of roll expressions, each expression's operation applies its value to
+   the result of all the preceding expressions. For example, `1d4 * 1d6 ^ 1d8 + 1d10` will roll 1d4, then roll 1d6 and
+   multiply the previous result by that, then roll 1d8 and take either that value or the previous result, whichever is
+   higher, then roll 1d10 and add it to the previous result. If the rolls were `1 5 3 8`, the result would be
+   `(((1 * 5) ^ 3) + 8)`, totalling 13.
+
 2. A "dice expression", defined below.
 3. Optionally, a purpose, like `2d6 for damage`,
-	which will print out in the results to help explain what was rolled (the purpose will consume all the text from
-	`for` up to the next comma or semicolon).
+   which will print out in the results to help explain what was rolled (the purpose will consume all the text from
+   `for` up to the next comma or semicolon).
 
 ### Basics of Dice Expressions
 
 Simple expressions involving standard dice notation is supported. You can do things like:
 
-* `NdX`: rolls `N` `X`-sided dice (`1d6` is a single 6-sided die, `2d4` is two
+- `NdX`: rolls `N` `X`-sided dice (`1d6` is a single 6-sided die, `2d4` is two
   4-sided dice).
-* `dX` is the same as `1dX` (so you can shorten `1d6` to `d6`).
-* `NdX!` is the exploding die mechanic (on max roll, roll again).
-* `NdXrT<V` lets you re-roll values less than `V` up to `T` times (default is once).
-* `NdXrT>V` lets you re-roll values greater than `V` up to `T` times (default is once).
-* `NdXKH`: rolls the dice and keeps the `H` highest results. For example, `2d20K1` is the 5e "advantage" mechanic.
-* `NdXkL`: like `K` but keeps the `L` lowest results. For example, `2d20k1` is the 5e's "disadvantage" mechanic.
+- `dX` is the same as `1dX` (so you can shorten `1d6` to `d6`).
+- `NdX!` is the exploding die mechanic (on max roll, roll again).
+- `NdXrT<V` lets you re-roll values less than `V` up to `T` times (default is once).
+- `NdXrT>V` lets you re-roll values greater than `V` up to `T` times (default is once).
+- `NdXKH`: rolls the dice and keeps the `H` highest results. For example, `2d20K1` is the 5e "advantage" mechanic.
+- `NdXkL`: like `K` but keeps the `L` lowest results. For example, `2d20k1` is the 5e's "disadvantage" mechanic.
 
 ### Full syntax and semantics
 

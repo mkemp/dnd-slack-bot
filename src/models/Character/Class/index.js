@@ -1,3 +1,3 @@
-'use strict';
+"use strict";
 
-module.exports = require('./Class.js');
+module.exports = require("./Class.js");

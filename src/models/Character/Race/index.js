@@ -1,3 +1,3 @@
-'use strict';
+"use strict";
 
-module.exports = require('./Race.js');
+module.exports = require("./Race.js");

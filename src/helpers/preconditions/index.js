@@ -1,3 +1,3 @@
-'use strict';
+"use strict";
 
-module.exports = require('./preconditions.js');
+module.exports = require("./preconditions.js");

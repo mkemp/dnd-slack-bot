@@ -1,7 +1,13 @@
 'use strict';
 
-const {Commands, Playing, Store, Summarize, Unrecognized} = require('./models/Commands');
-const {Storage} = require('./models/Storage');
+const {
+  Commands,
+  Playing,
+  Store,
+  Summarize,
+  Unrecognized
+} = require("./models/Commands");
+const { Storage } = require("./models/Storage");
 
 const querystring = require('querystring');
 const XRegExp = require('xregexp');

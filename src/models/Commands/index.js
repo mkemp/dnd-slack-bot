@@ -1,3 +1,3 @@
-'use strict';
+"use strict";
 
-module.exports = require('./Commands.js');
+module.exports = require("./Commands.js");

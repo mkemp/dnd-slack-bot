@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * Checks for the existence of the value.
@@ -6,7 +6,7 @@
  * @returns {boolean}
  */
 function isDefined(value) {
-    return value !== undefined && value !== null;
+  return value !== undefined && value !== null;
 }
 
 /**
@@ -15,10 +15,10 @@ function isDefined(value) {
  * @returns {boolean}
  */
 function isPresent(value) {
-    return isDefined(value) && value !== '';
+  return isDefined(value) && value !== "";
 }
 
 module.exports = {
-    isDefined,
-    isPresent
+  isDefined,
+  isPresent
 };

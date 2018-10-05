@@ -1,3 +1,3 @@
-'use strict';
+"use strict";
 
-module.exports = require('./Dice.js');
+module.exports = require("./Dice.js");

@@ -1,16 +1,15 @@
-'use strict';
+"use strict";
 
-const {Parser, RollDecorator, Roller} = require('../Dice');
+const { Parser, RollDecorator, Roller } = require("../Dice");
 
-const Preconditions = require('../../helpers/preconditions');
-const {Classes, Proficiency, Skills, Stats} = require('../../helpers/Reference');
-const Validation = require('../../helpers/validation');
+const Preconditions = require("../../helpers/preconditions");
+const Validation = require("../../helpers/validation");
 
-const Attack = require('./Attack');
-const Class = require('./Class');
-const Race = require('./Race');
-const Skill = require('./Skill');
-const Stat = require('./Stat');
+const Attack = require("./Attack");
+const { Class, Classes } = require("./Class");
+const Race = require("./Race");
+const { Skill, Skills } = require("./Skill");
+const { Stat, Stats } = require("./Stat");
 
 /**
  * Represents a single character.
@@ -24,11 +23,22 @@ module.exports = class Character {
    * @param level the character's level
    * @param defense the character's defense numbers
    * @param initiative the computed initiative
-   * @param stats map of ref stat to {Stat}
+   * @param stats map of ref stat to {Stats}
    * @param skills map of ref skill to {Skill}
    * @param attacks map of name to {Attack}
    */
-  constructor(id, name, race, classes, level, defense, initiative, stats, skills, attacks) {
+  constructor(
+    id,
+    name,
+    race,
+    classes,
+    level,
+    defense,
+    initiative,
+    stats,
+    skills,
+    attacks
+  ) {
     this.id = id;
     this.name = name;
     this.race = race;
@@ -41,8 +51,12 @@ module.exports = class Character {
     this.attacks = attacks;
   }
 
+  static proficiencyModifierFromLevel(level) {
+    return Math.floor((level - 1) / 4) + 2;
+  }
+
   get proficiencyModifier() {
-    return Proficiency.levelToModifier(this.level);
+    return Character.proficiencyModifierFromLevel(this.level);
   }
 
   /**
@@ -51,8 +65,12 @@ module.exports = class Character {
    * @param decorator any required decoration of the roll
    * @returns {string}
    */
-  rollInitiative(description='Initiative', decorator=RollDecorator.None) {
-    return Roller.roll(Parser.parse(decorator.decorate(`1d20 + ${this.initiative} for ${description}`)));
+  rollInitiative(description = "Initiative", decorator = RollDecorator.None) {
+    return Roller.roll(
+      Parser.parse(
+        decorator.decorate(`1d20 + ${this.initiative} for ${description}`)
+      )
+    );
   }
 
   /**
@@ -62,13 +80,27 @@ module.exports = class Character {
    * @param decorator any required decoration of the roll
    * @returns {string}
    */
-  rollAbilityCheck(abilityName, description='', decorator=RollDecorator.None) {
-    let ability = Object.values(this.skills).find(skill => skill.matches(abilityName));
+  rollAbilityCheck(
+    abilityName,
+    description = "",
+    decorator = RollDecorator.None
+  ) {
+    let ability = Object.values(this.skills).find(skill =>
+      skill.matches(abilityName)
+    );
     if (!Validation.isDefined(ability)) {
-        ability = Object.values(this.stats).find(stat => stat.matches(abilityName));
+      ability = Object.values(this.stats).find(stat =>
+        stat.matches(abilityName)
+      );
     }
     Preconditions.checkNotNull(ability, abilityName);
-    return Roller.roll(Parser.parse(decorator.decorate(`1d20 + ${ability.modifier} for ${ability.name} ${description}`)));
+    return Roller.roll(
+      Parser.parse(
+        decorator.decorate(
+          `1d20 + ${ability.modifier} for ${ability.name} ${description}`
+        )
+      )
+    );
   }
 
   /**
@@ -78,10 +110,22 @@ module.exports = class Character {
    * @param decorator any required decoration of the roll
    * @returns {string}
    */
-  rollSavingThrow(statName, description='', decorator=RollDecorator.None) {
-    const stat = Object.values(this.stats).find(stat => stat.matches(statName));
+  rollSavingThrow(
+    statName,
+    description = "",
+    decorator = RollDecorator.None
+  ) {
+    const stat = Object.values(this.stats).find(stat =>
+      stat.matches(statName)
+    );
     Preconditions.checkNotNull(stat, statName);
-    return Roller.roll(Parser.parse(decorator.decorate(`1d20 + ${stat.save} for ${stat.name} save ${description}`)));
+    return Roller.roll(
+      Parser.parse(
+        decorator.decorate(
+          `1d20 + ${stat.save} for ${stat.name} save ${description}`
+        )
+      )
+    );
   }
 
   /**
@@ -91,10 +135,20 @@ module.exports = class Character {
    * @param decorator any required decoration of the roll
    * @returns {string}
    */
-  rollAttackToHit(attackName, description='', decorator=RollDecorator.None) {
-    const attack = Object.values(this.attacks).find(attack => attack.matches(attackName));
+  rollAttackToHit(
+    attackName,
+    description = "",
+    decorator = RollDecorator.None
+  ) {
+    const attack = this.attacks.find(attack =>
+      attack.matches(attackName)
+    );
     Preconditions.checkNotNull(attack, attackName);
-    return Roller.roll(Parser.parse(decorator.decorate(`${attack.toHit} for ${attack.name} ${description}`)));
+    return Roller.roll(
+      Parser.parse(
+        decorator.decorate(`${attack.toHit} for ${attack.name} ${description}`)
+      )
+    );
   }
 
   /**
@@ -103,10 +157,14 @@ module.exports = class Character {
    * @param description the description of the roll
    * @returns {string}
    */
-  rollAttackDamage(attackName, description='') {
-    const attack = Object.values(this.attacks).find(attack => attack.matches(attackName));
+  rollAttackDamage(attackName, description = "") {
+    const attack = this.attacks.find(attack =>
+      attack.matches(attackName)
+    );
     Preconditions.checkNotNull(attack, attackName);
-    return Roller.roll(Parser.parse(`${attack.damage} for ${attack.name} ${description}`));
+    return Roller.roll(
+      Parser.parse(`${attack.damage} for ${attack.name} ${description}`)
+    );
   }
 
   /**
@@ -117,17 +175,23 @@ module.exports = class Character {
   static from(obj) {
     const classes = obj.classes.map(Class.from);
     const level = classes.map(c => c.levels).reduce((a, b) => a + b, 0);
-    const proficiencyModifier = Proficiency.levelToModifier(level);
+    const proficiencyModifier = Character.proficiencyModifierFromLevel(level);
     const stats = {};
     Object.entries(obj.stats).forEach(entry => {
-      const [ name, value ] = entry;
+      const [name, value] = entry;
       const ref = Stats.enumValueOf(name);
-      stats[ref] = new Stat(ref, value, Stats.statToModifier(value));
+      stats[ref] = new Stat(
+        ref,
+        value,
+        Stat.modifierFromValue(value)
+      );
     });
     let minProficiencyMultiplier = 0;
     classes.forEach((c, index) => {
       if (index === 0) {
-        c.ref.saves.forEach(stat => stats[stat].save += proficiencyModifier);
+        c.ref.saves.forEach(
+          stat => (stats[stat].save += proficiencyModifier)
+        );
       }
       switch (c.ref) {
         case Classes.Barbarian:
@@ -148,7 +212,9 @@ module.exports = class Character {
           // Aura of Protection
           if (6 <= c.levels) {
             const aura = Math.max(stats[Stats.Charisma].modifier, 1);
-            Object.values(stats).forEach(stat => stat.save += aura);
+            Object.values(stats).forEach(
+              stat => (stat.save += aura)
+            );
           }
           break;
         case Classes.Rogue:
@@ -159,7 +225,7 @@ module.exports = class Character {
           // }
           // Slippery Mind
           if (15 <= c.levels) {
-              stats[Stats.Wisdom].save += proficiencyModifier;
+            stats[Stats.Wisdom].save += proficiencyModifier;
           }
           break;
         default:
@@ -168,19 +234,35 @@ module.exports = class Character {
     });
     const skills = {};
     Object.entries(obj.skills).forEach(entry => {
-      const [ name, proficiencyMultiplier ] = entry;
+      const [name, proficiencyMultiplier] = entry;
       const ref = Skills.enumValueOf(name);
-      const finalProficiencyMultiplier = Math.max(proficiencyMultiplier, minProficiencyMultiplier);
+      const finalProficiencyMultiplier = Math.max(
+        proficiencyMultiplier,
+        minProficiencyMultiplier
+      );
       const stat = stats[ref.stat()];
-      skills[ref] = new Skill(ref, stat.modifier + Math.floor(finalProficiencyMultiplier * proficiencyModifier));
+      skills[ref] = new Skill(
+        ref,
+        stat.modifier +
+          Math.floor(finalProficiencyMultiplier * proficiencyModifier)
+      );
     });
-    const initiative = stats[Stats.Dexterity].modifier + (minProficiencyMultiplier * proficiencyModifier);
-    const attacks = {};
-    obj.attacks.forEach(attack => {
-      const {name, to_hit, damage} = attack;
-      attacks[name] = new Attack(name, to_hit, damage);
-    });
-    return new Character(obj.id, obj.name, Race.from(obj.race), classes, level, obj.defense, initiative, stats, skills, attacks);
+    const initiative =
+      stats[Stats.Dexterity].modifier +
+      minProficiencyMultiplier * proficiencyModifier;
+    const attacks = obj.attacks.map(Attack.from).sort((a1, a2) => a2.name.length - a1.name.length);
+    return new Character(
+      obj.id,
+      obj.name,
+      Race.from(obj.race),
+      classes,
+      level,
+      obj.defense,
+      initiative,
+      stats,
+      skills,
+      attacks
+    );
   }
 
   /**
@@ -190,22 +272,34 @@ module.exports = class Character {
    */
   static isValid(obj) {
     try {
-      Preconditions.checkNotNull(obj.name, 'name');
-      Preconditions.checkNotNull(obj.race, 'race');
-      Preconditions.checkNotNull(obj.defense, 'defense');
-      Preconditions.checkNotNull(obj.classes, 'classes');
-      Preconditions.checkState(Array.isArray(obj.classes), 'classes must be an Array');
+      Preconditions.checkNotNull(obj.name, "name");
+      Preconditions.checkNotNull(obj.race, "race");
+      Preconditions.checkNotNull(obj.defense, "defense");
+      Preconditions.checkNotNull(obj.classes, "classes");
+      Preconditions.checkState(
+        Array.isArray(obj.classes),
+        "classes must be an Array"
+      );
       Preconditions.checkInRange(obj.classes.length, 1, 20);
-      Preconditions.checkNotNull(obj.stats, 'stats');
+      Preconditions.checkNotNull(obj.stats, "stats");
       Stats.enumValues.forEach(stat => {
-        Preconditions.checkState(obj.stats.hasOwnProperty(stat.name), 'stats must have ' + stat.name)
+        Preconditions.checkState(
+          obj.stats.hasOwnProperty(stat.name),
+          "stats must have " + stat.name
+        );
       });
-      Preconditions.checkNotNull(obj.skills, 'skills');
+      Preconditions.checkNotNull(obj.skills, "skills");
       Skills.enumValues.forEach(skill => {
-        Preconditions.checkState(obj.stats.hasOwnProperty(skill.name), 'stats must have ' + skill.name)
+        Preconditions.checkState(
+          obj.stats.hasOwnProperty(skill.name),
+          "stats must have " + skill.name
+        );
       });
-      Preconditions.checkNotNull(obj.attacks, 'attacks');
-      Preconditions.checkState(Array.isArray(obj.attacks), 'attacks must be an Array');
+      Preconditions.checkNotNull(obj.attacks, "attacks");
+      Preconditions.checkState(
+        Array.isArray(obj.attacks),
+        "attacks must be an Array"
+      );
       return true;
     } catch (err) {
       return false;
