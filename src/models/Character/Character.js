@@ -7,7 +7,7 @@ const Validation = require("../../helpers/validation");
 
 const Attack = require("./Attack");
 const { Class, Classes } = require("./Class");
-const Race = require("./Race");
+const { Race, Races } = require("./Race");
 const { Skill, Skills } = require("./Skill");
 const { Stat, Stats } = require("./Stat");
 
@@ -110,14 +110,8 @@ module.exports = class Character {
    * @param decorator any required decoration of the roll
    * @returns {string}
    */
-  rollSavingThrow(
-    statName,
-    description = "",
-    decorator = RollDecorator.None
-  ) {
-    const stat = Object.values(this.stats).find(stat =>
-      stat.matches(statName)
-    );
+  rollSavingThrow(statName, description = "", decorator = RollDecorator.None) {
+    const stat = Object.values(this.stats).find(stat => stat.matches(statName));
     Preconditions.checkNotNull(stat, statName);
     return Roller.roll(
       Parser.parse(
@@ -180,18 +174,12 @@ module.exports = class Character {
     Object.entries(obj.stats).forEach(entry => {
       const [name, value] = entry;
       const ref = Stats.enumValueOf(name);
-      stats[ref] = new Stat(
-        ref,
-        value,
-        Stat.modifierFromValue(value)
-      );
+      stats[ref] = new Stat(ref, value, Stat.modifierFromValue(value));
     });
     let minProficiencyMultiplier = 0;
     classes.forEach((c, index) => {
       if (index === 0) {
-        c.ref.saves.forEach(
-          stat => (stats[stat].save += proficiencyModifier)
-        );
+        c.ref.saves.forEach(stat => (stats[stat].save += proficiencyModifier));
       }
       switch (c.ref) {
         case Classes.Barbarian:
@@ -212,9 +200,7 @@ module.exports = class Character {
           // Aura of Protection
           if (6 <= c.levels) {
             const aura = Math.max(stats[Stats.Charisma].modifier, 1);
-            Object.values(stats).forEach(
-              stat => (stat.save += aura)
-            );
+            Object.values(stats).forEach(stat => (stat.save += aura));
           }
           break;
         case Classes.Rogue:
