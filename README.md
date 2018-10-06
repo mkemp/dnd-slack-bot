@@ -158,12 +158,12 @@ The parser recognizes the following grammar:
           | Integer (treated as one 1 sided dice with a single value)
 
     Modifier ::=
-          | Explode? Reroll? Keep?
+          | Explode? ReRoll? Keep?
 
     Explode ::=
           | '!' (NdX!)
 
-    Reroll ::=
+    ReRoll ::=
           | 'r' Integer? '<' Integer (NdXrT<V, re-roll values less than V up to T times, missing T defaults to 1)
           | 'r' Integer? '>' Integer (NdXrT>V, re-roll values greater than V up to T times, missing T defaults to 1)
 

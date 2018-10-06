@@ -2,6 +2,10 @@
 
 const { Enum } = require("enumify");
 const Validation = require("../../helpers/validation");
+const ReRollHigherThan = require("./ReRoll/ReRollHigherThan");
+const ReRollLowerThan = require("./ReRoll/ReRollLowerThan");
+const KeepHighest = require("./Keep/KeepHighest");
+const KeepLowest = require("./Keep/KeepLowest");
 
 /**
  * Allows decoration of rolls in their string format.
@@ -80,96 +84,6 @@ Operator.initEnum({
     symbol: "v"
   }
 });
-
-/**
- * Encapsulates the logic for handling re-rolls.
- */
-class ReRoll {
-  constructor(times, matchesCondition) {
-    this.times = times;
-    this.matchesCondition = matchesCondition;
-  }
-
-  applyTo(result) {
-    if (result.rolls.some(this.matchesCondition)) {
-      result.rolls.forEach((value, index) => {
-        let newValue = value;
-        for (
-          let i = 0;
-          i < this.times && this.matchesCondition(newValue);
-          i++
-        ) {
-          result.rerolls.push(value);
-          newValue = result.rollSingle();
-        }
-        result.rolls[index] = newValue;
-      });
-      result.total = 0;
-      result.rolls.forEach(value => (result.total += value));
-    }
-  }
-}
-
-class ReRollHigherThan extends ReRoll {
-  constructor(times, greaterThanValue) {
-    super(times, value => value > greaterThanValue);
-    this.value = `>${greaterThanValue}`;
-  }
-
-  toString() {
-    return `r${this.times}${this.value}`;
-  }
-}
-
-class ReRollLowerThan extends ReRoll {
-  constructor(times, lessThanValue) {
-    super(times, value => value < lessThanValue);
-    this.value = `<${lessThanValue}`;
-  }
-
-  toString() {
-    return `r${this.times}${this.value}`;
-  }
-}
-
-/**
- * Encapsulates the logic for keeping a subset of results.
- */
-class Keep {
-  constructor(limit, applyOrdering) {
-    this.limit = limit;
-    this.applyOrdering = applyOrdering;
-  }
-
-  applyTo(result) {
-    this.applyOrdering(result.rolls);
-    result.rolls
-      .splice(this.limit)
-      .forEach(value => result.removed.push(value));
-    result.total = 0;
-    result.rolls.forEach(value => (result.total += value));
-  }
-}
-
-class KeepHighest extends Keep {
-  constructor(limit) {
-    super(limit, a => a.sort((a, b) => b - a));
-  }
-
-  toString() {
-    return `K${this.limit}`;
-  }
-}
-
-class KeepLowest extends Keep {
-  constructor(limit) {
-    super(limit, a => a.sort((a, b) => a - b));
-  }
-
-  toString() {
-    return `k${this.limit}`;
-  }
-}
 
 /**
  * Represents a single term in an {Expression}. Either a NdX or constant.
