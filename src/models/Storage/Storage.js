@@ -53,7 +53,7 @@ class Storage {
     if (!Validation.isPresent(params.userName)) {
       params.userName = await this.translateUser(params.userId, params.workspaceId);
     }
-    return await this.loadAsync(params);
+    return params.workspaceName && params.userName && await this.loadAsync(params);
   }
 
   loadAsync(params) {
@@ -67,18 +67,23 @@ class Storage {
       if (Validation.isDefined(character)) {
         resolve(character);
       } else {
-        s3.getObject({Bucket: campaignName, Key: `characters/${characterName}.json`}, (err, data) => {
-          if (err) {
-            console.log(`Error ${err}`);
-            reject(err);
-          }
-          // console.log('response = ' + data.Body.toString('utf-8'));
-          const characterObj = JSON.parse(data.Body.toString('utf-8'));
-          characterObj.id = params.userId;
-          character = Character.from(characterObj);
-          cache.set(characterName, character);
-          resolve(character);
-        });
+        s3.getObject(
+          {
+            Bucket: campaignName,
+            Key: `characters/${characterName}.json`
+          },
+          (err, data) => {
+            if (err) {
+              console.log(`Error ${err}`);
+              reject(err);
+            } else {
+              const characterObj = JSON.parse(data.Body.toString("utf-8"));
+              characterObj.id = params.userId;
+              character = Character.from(characterObj);
+              cache.set(characterName, character);
+              resolve(character);
+            }
+          });
       }
     });
   }
@@ -105,8 +110,9 @@ class Storage {
           if (err) {
             console.log(`Error ${err}`);
             reject(err);
+          } else {
+            resolve(data);
           }
-          resolve(data);
         }
       );
     });
@@ -117,18 +123,21 @@ class Storage {
     // work around bad `this` reference in the promise executor
     const dynamodb = this.dynamodb;
     return new Promise((resolve, reject) => {
-      dynamodb.putItem({
-        TableName: 'playing-as',
-        Item: toAttributes({slackUserId, slackWorkspaceId, characterName}),
-        ReturnConsumedCapacity: 'NONE',
-        ReturnValues: 'NONE'
-      }, (err, data) => {
-        if (err) {
-          console.log(`Error ${err}`);
-          reject(err);
-        }
-        resolve(data.Attributes);
-      });
+      dynamodb.putItem(
+        {
+          TableName: "playing-as",
+          Item: toAttributes({ slackUserId, slackWorkspaceId, characterName }),
+          ReturnConsumedCapacity: "NONE",
+          ReturnValues: "NONE"
+        },
+        (err, data) => {
+          if (err) {
+            console.log(`Error ${err}`);
+            reject(err);
+          } else {
+            resolve(data.Attributes);
+          }
+        });
     });
   }
 
@@ -136,20 +145,26 @@ class Storage {
     // work around bad `this` reference in the promise executor
     const dynamodb = this.dynamodb;
     return new Promise((resolve, reject) => {
-      dynamodb.getItem({
-        TableName: 'playing-as',
-        Key: toAttributes({slackUserId}),
-        ReturnConsumedCapacity: 'NONE'
-      }, (err, data) => {
-        if (err) {
-          console.log(`Error ${err}`);
-          reject(err);
-        }
-        if (slackWorkspaceId !== data.Item.slackWorkspaceId.S) {
-          reject(`Expected workspace ${slackWorkspaceId} != ${data.Item.slackWorkspaceId.S}`);
-        }
-        resolve(data.Item.characterName.S);
-      });
+      dynamodb.getItem(
+        {
+          TableName: "playing-as",
+          Key: toAttributes({ slackUserId }),
+          ReturnConsumedCapacity: "NONE"
+        },
+        (err, data) => {
+          if (err) {
+            console.log(`Error ${err}`);
+          }
+          if (!data.Item) {
+            console.log(`Unable to find mapping for ${slackUserId} in workspace ${slackWorkspaceId}`);
+            resolve();
+          } else if (slackWorkspaceId !== data.Item.slackWorkspaceId.S) {
+            console.log(`Expected workspace ${slackWorkspaceId} != ${data.Item.slackWorkspaceId.S}`);
+            resolve();
+          } else {
+            resolve(data.Item.characterName.S);
+          }
+        });
     });
   }
 }
