@@ -1,11 +1,14 @@
 "use strict";
 
 const { Enum } = require("enumify");
-const Validation = require("../../helpers/validation");
-const ReRollHigherThan = require("./ReRoll/ReRollHigherThan");
-const ReRollLowerThan = require("./ReRoll/ReRollLowerThan");
-const KeepHighest = require("./Keep/KeepHighest");
-const KeepLowest = require("./Keep/KeepLowest");
+const { isPresent } = require("../../helpers/validation");
+const Expression = require("../Expression");
+const KeepHighest = require("../Expression/Term/Keep/KeepHighest");
+const KeepLowest = require("../Expression/Term/Keep/KeepLowest");
+const Operators = require("../Expression/Term/Operators");
+const ReRollHigherThan = require("../Expression/Term/ReRoll/ReRollHigherThan");
+const ReRollLowerThan = require("../Expression/Term/ReRoll/ReRollLowerThan");
+const Term = require("../Expression/Term");
 
 /**
  * Allows decoration of rolls in their string format.
@@ -41,212 +44,6 @@ RollDecorator.initEnum({
     }
   }
 });
-
-/**
- * Represents operators between {Term}s.
- */
-class Operator extends Enum {
-  static for(symbol) {
-    switch (symbol) {
-      case "-":
-        return Operator.Subtract;
-      case "*":
-      case "x":
-        return Operator.Multiply;
-      case "/":
-        return Operator.Divide;
-      case "^":
-        return Operator.Max;
-      case "v":
-        return Operator.Min;
-      default:
-        return Operator.Add;
-    }
-  }
-}
-Operator.initEnum({
-  Add: {
-    symbol: "+"
-  },
-  Subtract: {
-    symbol: "-"
-  },
-  Multiply: {
-    symbol: "x"
-  },
-  Divide: {
-    symbol: "/"
-  },
-  Max: {
-    symbol: "^"
-  },
-  Min: {
-    symbol: "v"
-  }
-});
-
-/**
- * Represents a single term in an {Expression}. Either a NdX or constant.
- */
-class Term {
-  constructor() {
-    this.operator = Operator.Add;
-    this.number = 1;
-    this.sides = 1;
-    this.reroll = null;
-    this.keep = null;
-    this.explode = false;
-  }
-
-  get constant() {
-    return this.sides === 1;
-  }
-
-  toResult(random = Math.random) {
-    return new Result(this, random);
-  }
-
-  toCanonicalForm() {
-    return this.constant
-      ? `${this.number}`
-      : `${this.number}d${this.sides}${this.explode ? "!" : ""}${this.reroll ||
-          ""}${this.keep || ""}`;
-  }
-
-  toString() {
-    return `${this.operator.symbol} ${this.toCanonicalForm()}`;
-  }
-}
-
-/**
- * Represents a single term in an {Expression}. Either a NdX or constant.
- */
-class Expression {
-  constructor(terms, purpose) {
-    this.terms = terms;
-    this.purpose = purpose;
-  }
-
-  toEvaluation(random = Math.random) {
-    return new Evaluation(this, random);
-  }
-
-  toString() {
-    let rendered = this.terms.join(" ");
-    if (this.terms[0].operator !== Operator.Subtract) {
-      rendered = rendered.slice(2);
-    }
-    return `${rendered}${this.purpose ? " for " + this.purpose : ""}`;
-  }
-}
-
-/**
- * Represents the result of a single {Term}.
- */
-class Result {
-  constructor(term, random = Math.random) {
-    this.term = term;
-    this.random = random;
-    this.rolls = [];
-    this.rerolls = [];
-    this.removed = [];
-    if (this.term.constant) {
-      this.total = this.rollSingle();
-    } else {
-      this.total = 0;
-      let number = this.term.number;
-      for (let i = 0; i < number; i++) {
-        const value = this.rollSingle();
-        this.total += value;
-        this.rolls.push(value);
-        if (this.term.explode && value === this.term.sides) {
-          number++;
-        }
-      }
-      if (this.term.reroll) {
-        this.term.reroll.applyTo(this);
-      }
-      if (this.term.keep) {
-        this.term.keep.applyTo(this);
-      }
-    }
-  }
-
-  rollSingle() {
-    return this.term.constant
-      ? this.term.number
-      : Math.floor(this.random() * this.term.sides) + 1;
-  }
-}
-
-/**
- * Represents the evaluation of an entire {Expression}.
- */
-class Evaluation {
-  constructor(expression, random = Math.random) {
-    this.expression = expression;
-    this.results = [];
-    this.total = 0;
-    this.text = "";
-    this.fallback = "";
-    this.expression.terms
-      .map(term => term.toResult(random))
-      .forEach((result, index) => {
-        this.results.push(result);
-        switch (result.term.operator) {
-          case Operator.Add:
-            this.total += result.total;
-            break;
-          case Operator.Subtract:
-            this.total -= result.total;
-            break;
-          case Operator.Multiply:
-            this.total *= result.total;
-            break;
-          case Operator.Divide:
-            // Just ignoring divide by zero.
-            if (result.total !== 0) {
-              this.total /= result.total;
-            }
-            break;
-          case Operator.Max:
-            if (result.total > this.total) {
-              this.total = result.total;
-            }
-            break;
-          case Operator.Min:
-            if (result.total < this.total) {
-              this.total = result.total;
-            }
-            break;
-        }
-        if (index > 0) {
-          this.text += ` ${result.term.operator.symbol} `;
-          this.fallback += ` ${result.term.operator.symbol} `;
-        } else if (result.term.operator === Operator.Subtract) {
-          this.text += `${result.term.operator.symbol} `;
-          this.fallback += `${result.term.operator.symbol} `;
-        }
-        this.text += `*${result.total}*`;
-        this.fallback += `${result.total}`;
-      });
-
-    if (this.results.length === 0) {
-      this.text += `*0*`;
-      this.text += `0`;
-    }
-    this.text += ` = *${this.total}*`;
-    this.fallback += ` = ${this.total}`;
-    if (Validation.isPresent(expression.purpose)) {
-      this.text += ` for *${this.expression.purpose}*`;
-      this.fallback += ` for ${this.expression.purpose}`;
-    }
-  }
-
-  toString() {
-    return this.fallback;
-  }
-}
 
 const splitExpressions = /\s*[,;]\s*/g;
 const splitPurpose = " for ";
@@ -293,17 +90,17 @@ class Parser {
           constant
         ] = match;
         const term = new Term();
-        term.operator = Operator.for(operator);
-        if (Validation.isPresent(number)) {
+        term.operator = Operators.for(operator);
+        if (isPresent(number)) {
           term.number = Math.max(1, parseInt(number, 10));
         }
-        if (Validation.isPresent(sides)) {
+        if (isPresent(sides)) {
           term.sides = sides === "%" ? 100 : Math.max(1, parseInt(sides, 10));
         }
-        if (Validation.isPresent(explode)) {
+        if (isPresent(explode)) {
           term.explode = true;
         }
-        if (Validation.isPresent(reroll)) {
+        if (isPresent(reroll)) {
           splitReRoll.lastIndex = 0; // forces reset
           const match = splitReRoll.exec(reroll);
           /*
@@ -313,7 +110,7 @@ class Parser {
            * 3: V in rT<V/rT>V
            */
           const [_, timesString, ltOrGt, valueString] = match;
-          const times = Validation.isPresent(timesString)
+          const times = isPresent(timesString)
             ? Math.max(1, parseInt(timesString))
             : 1;
           const value = Math.min(
@@ -325,7 +122,7 @@ class Parser {
               ? new ReRollHigherThan(times, value)
               : new ReRollLowerThan(times, value);
         }
-        if (Validation.isPresent(keep)) {
+        if (isPresent(keep)) {
           const limit = Math.min(
             Math.max(1, parseInt(keep.slice(1), 10)),
             term.number
@@ -335,7 +132,7 @@ class Parser {
               ? new KeepHighest(limit)
               : new KeepLowest(limit);
         }
-        if (Validation.isPresent(constant)) {
+        if (isPresent(constant)) {
           term.number = parseInt(constant, 10);
         }
         terms.push(term);
